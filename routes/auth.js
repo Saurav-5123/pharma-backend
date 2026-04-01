@@ -14,13 +14,27 @@ const transporter = nodemailer.createTransport({
 
 // ADMIN LOGIN
 router.post("/login", async (req, res) => {
-  const { username, password } = req.body;
+  try {
+    const { username, password } = req.body;
 
-  const user = await User.findOne({ username, password, role: "admin" });
+    console.log("LOGIN DATA:", username, password); // debug
 
-  if (!user) return res.status(400).json("Invalid credentials");
+    const user = await User.findOne({ username });
 
-  res.json(user);
+    if (!user) {
+      return res.status(400).json("User not found");
+    }
+
+    if (user.password !== password) {
+      return res.status(400).json("Wrong password");
+    }
+
+    return res.status(200).json("Login success");
+
+  } catch (err) {
+    console.log("LOGIN ERROR:", err);
+    res.status(500).json("Server error");
+  }
 });
 
 // SEND OTP
